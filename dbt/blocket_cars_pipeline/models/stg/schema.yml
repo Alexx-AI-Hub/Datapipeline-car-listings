@@ -1,0 +1,165 @@
+# Error: Unique combination --> (listing_id, uploaded_at, source_file)
+# Error: Not NULL/' ' --> (listing_id, uploaded_at, source_file)
+# Warn: Not NULL/' ' for 16 other columns
+# Warn: Accepted sales_form_code values and mileage_mil >= 0
+
+version: 2
+models:
+- name: stg_blocket_car_listings
+  description: One unique listing observation per ID, publication timestamp, and source
+    file.
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - listing_id
+        - uploaded_at
+        - source_file
+      config:
+        store_failures: true
+  columns:
+  - name: listing_id
+    data_tests:
+    - not_null:
+        config:
+          severity: error
+          store_failures: true
+    - dbt_utils.not_empty_string:
+        config:
+          severity: error
+  - name: uploaded_at
+    data_tests:
+    - not_null:
+        config:
+          severity: error
+          store_failures: true
+  - name: source_file
+    data_tests:
+    - not_null:
+        config:
+          severity: error
+          store_failures: true
+    - dbt_utils.not_empty_string:
+        config:
+          severity: error
+  - name: sales_form_code
+    data_tests:
+    - accepted_values:
+        arguments:
+          values:
+          - 1
+          - 2
+          - 5
+          quote: false
+        config:
+          severity: warn
+    - not_null:
+        config:
+          severity: warn
+  - name: mileage_mil
+    data_tests:
+    - dbt_utils.accepted_range:
+        arguments:
+          min_value: 0
+        config:
+          severity: warn
+    - not_null:
+        config:
+          severity: warn
+  - name: listing_title
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_utils.not_empty_string:
+        config:
+          severity: warn
+  - name: listing_url
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_utils.not_empty_string:
+        config:
+          severity: warn
+  - name: location
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_utils.not_empty_string:
+        config:
+          severity: warn
+  - name: price
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: model_year
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: make
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_utils.not_empty_string:
+        config:
+          severity: warn
+  - name: registration_class_name
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_utils.not_empty_string:
+        config:
+          severity: warn
+  - name: seller_type
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_utils.not_empty_string:
+        config:
+          severity: warn
+  - name: listing_type_code
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: latitude
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: longitude
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: car_model
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_utils.not_empty_string:
+        config:
+          severity: warn
+  - name: transmission
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_utils.not_empty_string:
+        config:
+          severity: warn
+  - name: fuel_type
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_utils.not_empty_string:
+        config:
+          severity: warn

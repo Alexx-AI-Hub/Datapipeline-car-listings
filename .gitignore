@@ -1,0 +1,50 @@
+.env
+.env.*
+!.env.example
+!*.env.example
+/.vscode/
+
+# Python environments and cache
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+
+# Local Raw Data
+/Data/*
+!/Data/.gitkeep
+
+# Local DataWareHouse
+/datawarehouse/*
+!/datawarehouse/.gitkeep
+*.duckdb
+*.duckdb.wal
+
+# Airflow 
+/airflow/logs/
+simple_auth_manager_passwords.json*
+airflow.db
+airflow.db-wal
+airflow.db-shm
+/airflow/config/airflow.cfg
+
+# dbt
+/dbt/**/target/
+/dbt/**/dbt_packages/
+/dbt/**/logs/
+/dbt/**/.user.yml
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temp files
+/gg.py
+/gg.sql
+/load_all_local_to_raw.sql

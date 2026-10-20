@@ -1,0 +1,19 @@
+# Error: Not NULL --> ad_id, timestamp, source_file(or ' ')
+
+version: 2
+
+models:
+  - name: raw_blocket_car_listings
+    columns:
+      - name: ad_id
+        data_tests:
+          - not_null
+
+      - name: timestamp
+        data_tests:
+          - not_null
+
+      - name: source_file
+        data_tests:
+          - not_null
+          - dbt_utils.not_empty_string

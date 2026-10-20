@@ -1,0 +1,45 @@
+# Error: if row counts in INT != STG
+# Warn: Not NULL --> sale_type, valid_price, region
+# Warn: Accepted values --> sale_type
+
+
+version: 2
+sources:
+- name: geography
+  schema: reference
+  tables:
+  - name: region_geo_boundaries
+models:
+- name: int_blocket_car_listing_geography
+  data_tests:
+  - dbt_utils.equal_rowcount:
+      arguments:
+        compare_model: ref('stg_blocket_car_listings')
+      config:
+        severity: error
+  columns:
+  - name: sale_type
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - accepted_values:
+        arguments:
+          values:
+          - Used
+          - New
+          - Lease
+          - Unknown
+        config:
+          severity: warn
+  - name: valid_price
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: region
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+          store_failures: true

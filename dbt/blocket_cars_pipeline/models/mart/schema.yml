@@ -1,0 +1,116 @@
+version: 2
+
+models:
+
+- name: dim_car
+  description: One observed combination of car attributes; not one physical vehicle.
+  columns:
+  - name: car_key
+    description: Numeric surrogate key for one car configuration; reassigned on rebuild.
+    data_type: bigint
+    data_tests:
+    - not_null
+    - unique
+
+
+- name: dim_seller
+  description: One observed seller profile; missing identity does not identify a person.
+  columns:
+  - name: seller_key
+    description: Numeric surrogate key for one seller profile; reassigned on rebuild.
+    data_type: bigint
+    data_tests:
+    - not_null
+    - unique
+
+
+- name: dim_location
+  description: Region is based on gpd coordinates, location = seller input(Can be anything).
+  columns:
+  - name: location_key
+    description: Numeric surrogate key for one (region, location) combination; reassigned on rebuild.
+    data_type: bigint
+    data_tests:
+    - not_null
+    - unique
+
+  - name: location
+    description: Place name; the same name may exist in different regions.
+
+  - name: region
+    description: County derived from coordinates; NULL when no unambiguous county match exists.
+
+
+- name: dim_date
+  description: One calendar day from uploaded_at without timezone conversion.
+  columns:
+  - name: date_key
+    description: Primary key(PK).
+    data_tests:
+    - not_null
+    - unique
+
+
+- name: fact_listing_versions
+  description: One listing version per (listing_id, uploaded_at, source_file).
+  
+  columns:
+
+  - name: listing_version_key
+    description: Numeric surrogate key generated in this fact table; reassigned on rebuild.
+    data_type: bigint
+    data_tests:
+    - not_null
+    - unique
+
+  - name: listing_id
+    description: Foreign key(FK) ->
+    data_tests:
+    - not_null
+
+  - name: uploaded_at
+    description: Publication timestamp; part of the natural version key.
+    data_tests:
+    - not_null
+
+  - name: date_key
+    description: Foreign key(FK)
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_date')
+          field: date_key
+
+  - name: car_key
+    description: Foreign key(FK)
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_car')
+          field: car_key
+
+  - name: seller_key
+    description: Foreign key(FK)
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_seller')
+          field: seller_key
+
+  - name: location_key
+    description: Foreign key(FK)
+    data_tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('dim_location')
+          field: location_key
+
+  - name: latitude
+    description: Latitude observed for this listing version; may be missing.
+
+  - name: longitude
+    description: Longitude observed for this listing version; may be missing.

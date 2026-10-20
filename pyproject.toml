@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=65.5", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blocket-cars-pipeline"
+version = "1.0.0"
+description = "Blocket car listing ingestion and dbt transformations with DuckDB"
+readme = "README.md"
+requires-python = ">=3.11"
+# Airflow itself is installed in the Linux image defined in airflow/Dockerfile.
+dependencies = [
+    "blocket-api==0.5.2",
+    "httpx==0.28.1",
+    "cryptography>=50.0.1,<51",
+    "python-dotenv==1.2.4",
+    "dbt-core==1.12.5",
+    "dbt-duckdb==1.11.0",
+    "duckdb==1.5.6",
+    "tzdata==2026.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "sqlfluff==4.4.0",
+    "sqlfluff-templater-dbt==4.4.0",
+]
+
+[tool.setuptools]
+# Scripts run from this repository; installation provides their dependencies.
+packages = []
+
+[tool.sqlfluff.core]
+dialect = "duckdb"
+templater = "dbt"
+
+[tool.sqlfluff.templater.dbt]
+project_dir = "dbt/blocket_cars_pipeline"
+profiles_dir = "dbt/blocket_cars_pipeline"
+target = "lint"
+
+[tool.sqlfluff.templater.dbt.context]
+batch_date = "2026-10-15"

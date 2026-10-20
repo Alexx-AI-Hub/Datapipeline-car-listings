@@ -1,0 +1,16 @@
+blocket_cars_pipeline:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../../datawarehouse/dwh.duckdb
+      threads: 1
+      extensions:
+        - spatial   # Geometry functions for our region mappings.
+
+    lint:           # Linter to get correct syntax for dbt
+      type: duckdb
+      path: datawarehouse/dwh.duckdb
+      threads: 1
+      extensions:
+        - spatial
