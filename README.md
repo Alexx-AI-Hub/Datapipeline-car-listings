@@ -19,8 +19,8 @@ The project demonstrates data ingestion, workflow orchestration, SQL transformat
 ## 2. Architecture
 
 The project separates API collection, file storage, warehouse transformations,
-and analytical consumption. Python collects listing batches; dbt loads and
-transforms them inside DuckDB. Airflow schedules both activities in Docker.
+and analytical consumption. Python collects listing batches and dbt loads and
+transforms them inside DuckDB. Airflow schedules ingestion in Docker. Each successful scheduled ingestion triggers dbt for the same batch date.
 Power BI is the planned reporting layer and is not connected yet.
 
 ```mermaid
@@ -44,7 +44,8 @@ flowchart TD
 
     subgraph orchestration ["Docker: Airflow orchestration"]
         ING["blocket_daily_dag: 15:00"]
-        DBT["blocket_dbt_dag: 16:00"]
+        DBT["blocket_dbt_dag"]
+        ING -->|Successful scheduled ingestion| DBT
         PG[("PostgreSQL: Airflow metadata")]
     end
 
@@ -232,12 +233,14 @@ docker compose exec -w /opt/airflow/project airflow-scheduler python -c "from pa
 ```
 
 Open [Airflow](http://localhost:8080), log in as `airflow` with your configured password,
-and enable `blocket_daily_dag` and `blocket_dbt_dag`. They run at 15:00 and 16:00
-(Stockholm time), with catchup enabled. Results are stored in `datawarehouse/dwh.duckdb` under `mart`.
+and enable both DAGs. `blocket_daily_dag` runs at 15:00 Stockholm time with catchup enabled.
+After a successful scheduled ingestion, it triggers `blocket_dbt_dag` with the batch date.
+If the dbt task fails, Airflow retries the same batch up to three times at 10-minute intervals.
+Results are stored in `datawarehouse/dwh.duckdb` under `mart`.
 
 ### Trigger a batch manually
 
-To test immediately, use **Trigger DAG** in Airflow: run `blocket_daily_dag` first,
+Manual ingestion runs independently. To process a batch manually, run `blocket_daily_dag` first,
 wait for it to succeed, then trigger `blocket_dbt_dag`. Set `batch_date` to the batch's
 Stockholm date (`YYYY-MM-DD`) and `batch_window_end` to the ingestion window's end
 (ISO timestamp with timezone offset) so the time-window test matches the manual batch.

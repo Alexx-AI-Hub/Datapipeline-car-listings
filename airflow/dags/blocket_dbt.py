@@ -1,13 +1,12 @@
 
 from airflow.sdk import Param, dag, task  # type: ignore
-from pendulum import datetime  # type: ignore
+from pendulum import datetime, duration  # type: ignore
 
 
 @dag(
     dag_id="blocket_dbt_dag",
     start_date=datetime(2026, 10, 13, tz="Europe/Stockholm"),
-    schedule="0 16 * * *",
-    catchup=True,
+    schedule=None,
     max_active_runs=1,
     params={
         "batch_date": Param(None, type=["null", "string"]),
@@ -16,15 +15,9 @@ from pendulum import datetime  # type: ignore
     tags=["blocket", "dbt"],
 )
 def blocket_dbt_dag():
-    @task
+    @task(retries=3, retry_delay=duration(minutes=10))
     def run_dbt_pipeline() -> None:
-        """Runs the daily dbt-pipeline for the selected or scheduled batch.
-
-        Read batch_date from run configuration or DAG parameters. If omitted,
-        scheduled runs use the interval end date in Europe/Stockholm, including
-        delayed runs. Manual runs require an explicit date in YYYY-MM-DD format.
-        Raise ValueError if no date is available and propagate dbt failures.
-        """
+        """Runs the daily dbt-pipeline for the given/inputed batch_date."""
         import json
         import subprocess
 
@@ -34,12 +27,7 @@ def blocket_dbt_dag():
         conf = context["dag_run"].conf or {}
         batch_date = conf.get("batch_date") or context["params"].get("batch_date")
 
-        if not batch_date and context["dag_run"].run_type == "scheduled": # Scheduled run without batch_date uses scheduled date.
-            batch_date = (
-                context["data_interval_end"]
-                .in_timezone("Europe/Stockholm")
-                .strftime("%Y-%m-%d")
-            )
+
         if not batch_date:                                                # Manual run without batch_date is not allowed.
             raise ValueError("Must set batch_date to YYYY-MM-DD for a manual run.")
 
