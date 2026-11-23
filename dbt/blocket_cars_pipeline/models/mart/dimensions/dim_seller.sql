@@ -15,9 +15,10 @@ WITH profiles AS (
 )
 
 SELECT
+    p.*,
     ROW_NUMBER() OVER (
-        ORDER BY org_id, seller_organisation_name, seller_type,
-            dealer_group_id, association_memberships
-    ) AS seller_key,
-    p.*
+        ORDER BY
+            p.org_id, p.seller_organisation_name, p.seller_type,
+            p.dealer_group_id, p.association_memberships
+    ) AS seller_key
 FROM profiles AS p

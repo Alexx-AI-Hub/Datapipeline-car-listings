@@ -9,7 +9,9 @@ WITH locations AS (
 )
 
 SELECT
-    ROW_NUMBER() OVER (ORDER BY region, location) AS location_key,
     l.location,
-    l.region
+    l.region,
+    ROW_NUMBER() OVER (
+        ORDER BY l.region, l.location
+    ) AS location_key
 FROM locations AS l

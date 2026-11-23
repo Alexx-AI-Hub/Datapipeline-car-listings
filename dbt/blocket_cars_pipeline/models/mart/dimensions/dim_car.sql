@@ -16,9 +16,10 @@ WITH configurations AS (
 )
 
 SELECT
+    c.*,
     ROW_NUMBER() OVER (
-        ORDER BY make, car_model_series, car_model, model_specification,
-            model_year, transmission, fuel_type, registration_class_name
-    ) AS car_key,
-    c.*
+        ORDER BY
+            c.make, c.car_model_series, c.car_model, c.model_specification,
+            c.model_year, c.transmission, c.fuel_type, c.registration_class_name
+    ) AS car_key
 FROM configurations AS c

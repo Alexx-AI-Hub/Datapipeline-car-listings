@@ -1,4 +1,4 @@
-{{ config(severity='warn', store_failures=true) }}
+{{ config(severity='error', store_failures=true) }}
 {% set batch = raw_batch_test_context() %}
 
 -- Compare distinct ads, not raw row counts; raw duplicates are allowed.

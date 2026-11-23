@@ -1,6 +1,6 @@
 {{ config(materialized='view', schema='int') }}
 
--- Grain: one observed listing version per (listing_id, uploaded_at, source_file).
+-- Grain: observed listing version per (listing_id, uploaded_at, source_file).
 -- +6 new columns
 
 SELECT -- noqa: ST06
@@ -50,37 +50,42 @@ SELECT -- noqa: ST06
     END AS sale_type,
 
     -- New! previous_price
-    lag(s.price) OVER (
+    LAG(s.price) OVER (
         PARTITION BY s.listing_id
-        ORDER BY s.uploaded_at,
-        TRY_STRPTIME(
-            REGEXP_EXTRACT(s.source_file, '([0-9]{4}_[0-9]{2}_[0-9]{2})[.]jsonl[.]gz$', 1),
-            '%Y_%m_%d'
-        ) ASC NULLS FIRST,
-        s.source_file
+        ORDER BY
+            s.uploaded_at ASC,
+            TRY_STRPTIME(
+                REGEXP_EXTRACT(
+                    s.source_file,
+                    '([0-9]{4}_[0-9]{2}_[0-9]{2})[.]jsonl[.]gz$',
+                    1
+                ),
+                '%Y_%m_%d'
+            ) ASC NULLS FIRST,
+            s.source_file
     ) AS previous_price,
 
     -- New! price_change
     s.price - previous_price AS price_change,
 
     -- New! price_change_pct
-    cast(
-        round(
+    CAST(
+        ROUND(
             100.0 * (s.price - previous_price)
-            / nullif(previous_price, 0), 2
+            / NULLIF(previous_price, 0), 2
         ) AS DECIMAL(18, 2)
     ) AS price_change_pct,
 
     -- New! valid_price
-    coalesce(s.price > 0, FALSE) AS valid_price,
+    COALESCE(s.price > 0, FALSE) AS valid_price,
 
     -- New! car_age
     CASE -- Calculate car age. Invalid years is set to NULL.
         WHEN
             s.model_year > 1800
-            AND s.model_year <= year(current_date) + 1 -- Allow 2027
-            THEN cast(
-                greatest(year(s.uploaded_at) - s.model_year, 0)
+            AND s.model_year <= YEAR(CURRENT_DATE) + 1 -- Allow 2027
+            THEN CAST(
+                GREATEST(YEAR(s.uploaded_at) - s.model_year, 0)
                 AS INTEGER
             )
     END AS car_age

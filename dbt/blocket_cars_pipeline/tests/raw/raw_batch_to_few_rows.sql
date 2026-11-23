@@ -1,4 +1,4 @@
-{{ config(severity='error', store_failures=true) }}
+{{ config(severity='warn', store_failures=true) }}
 {% set batch = raw_batch_test_context() %}
 
 -- Fail when the selected batch contains fewer than 2,000 raw rows.

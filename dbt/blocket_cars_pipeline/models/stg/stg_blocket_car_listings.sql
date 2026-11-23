@@ -61,17 +61,7 @@ SELECT -- noqa: ST06
 
 FROM {{ ref('raw_blocket_car_listings') }} AS r
 
--- De-duplicate within each source file; preserve observations from other batches.
+-- Dedupe within each source file, preserve observations from other batches.
 QUALIFY ROW_NUMBER() OVER (
     PARTITION BY listing_id, uploaded_at, source_file
-    ORDER BY
-        TRY_STRPTIME(
-            REGEXP_EXTRACT(
-                r.source_file,
-                '([0-9]{4}_[0-9]{2}_[0-9]{2})[.]jsonl[.]gz$',
-                1
-            ),
-            '%Y_%m_%d'
-        ) DESC NULLS LAST,
-        r.source_file DESC
 ) = 1
