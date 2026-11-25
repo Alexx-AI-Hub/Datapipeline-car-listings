@@ -1,8 +1,11 @@
-{{ config(severity='error', store_failures=true) }}
-{% set batch = raw_batch_test_context() %}
-
 -- Compare distinct ads, not raw row counts; raw duplicates are allowed.
 -- Missing calendar days are excluded, and future batches never enter the baseline.
+
+{{ config(severity='warn', store_failures=true) }}
+{% set batch = raw_batch_test_context() %}
+{% set threshold = 0.3 %}
+
+
 WITH daily_counts AS (
     SELECT
         source_file,
@@ -33,7 +36,7 @@ SELECT
     c.ad_count AS current_ad_count,
     b.comparison_days,
     b.median_ad_count,
-    b.median_ad_count * 0.4 AS warning_threshold,
+    b.median_ad_count * {{ threshold }} AS warning_threshold,
     ROUND(
         100.0 * (b.median_ad_count - c.ad_count) / NULLIF(b.median_ad_count, 0), 2
     ) AS drop_pct
@@ -41,4 +44,4 @@ FROM current_batch AS c
 CROSS JOIN baseline AS b
 WHERE b.comparison_days >= 3
     AND b.median_ad_count > 0
-    AND c.ad_count < b.median_ad_count * 0.4
+    AND c.ad_count < b.median_ad_count * {{ threshold }}

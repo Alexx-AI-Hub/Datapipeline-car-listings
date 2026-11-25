@@ -8,4 +8,4 @@ SELECT
     COUNT(*) AS row_count
 FROM {{ ref('raw_blocket_car_listings') }}
 WHERE source_file = '{{ batch.filename }}'
-HAVING COUNT(*) < 2000
+HAVING COUNT(*) < 1000

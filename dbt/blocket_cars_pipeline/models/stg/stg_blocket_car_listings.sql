@@ -28,9 +28,12 @@ SELECT -- noqa: ST06
     NULLIF(TRIM(CAST(r.make AS VARCHAR)), '') AS make,
     NULLIF(TRIM(CAST(r.series AS VARCHAR)), '') AS car_model_series,
     NULLIF(TRIM(CAST(r.model AS VARCHAR)), '') AS car_model,
-    NULLIF(TRIM(CAST(r.model_specification AS VARCHAR)), '')
-        AS model_specification,
-    CAST(r.mileage AS BIGINT) AS mileage_mil,
+    NULLIF(TRIM(CAST(r.model_specification AS VARCHAR)), '') AS model_specification,
+    CASE
+        WHEN TRY_CAST(r.mileage AS BIGINT) BETWEEN 0 AND 100000
+            THEN CAST(r.mileage AS BIGINT)
+        ELSE NULL
+    END AS mileage_mil,
     NULLIF(TRIM(CAST(r.transmission AS VARCHAR)), '') AS transmission,
     NULLIF(TRIM(CAST(r.fuel AS VARCHAR)), '') AS fuel_type,
     NULLIF(TRIM(CAST(r.registration_class['value'] AS VARCHAR)), '')

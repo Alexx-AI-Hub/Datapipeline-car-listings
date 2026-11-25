@@ -82,8 +82,8 @@ SELECT -- noqa: ST06
     -- New! car_age
     CASE -- Calculate car age. Invalid years is set to NULL.
         WHEN
-            s.model_year > 1800
-            AND s.model_year <= YEAR(CURRENT_DATE) + 1 -- Allow 2027
+            s.model_year >= 1886
+            AND s.model_year <= YEAR(s.uploaded_at) + 1 -- Allow next years model age.
             THEN CAST(
                 GREATEST(YEAR(s.uploaded_at) - s.model_year, 0)
                 AS INTEGER
