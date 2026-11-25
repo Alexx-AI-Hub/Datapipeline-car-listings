@@ -1,4 +1,4 @@
-{{ config(materialized='table', schema='mart') }}
+{{ config(materialized='view', schema='mart') }}
 
 SELECT *
 FROM {{ ref('fact_listing_versions') }}
