@@ -7,7 +7,11 @@ QUALIFY ROW_NUMBER() OVER (
     ORDER BY
         uploaded_at DESC,
         TRY_STRPTIME(
-            REGEXP_EXTRACT(source_file, '([0-9]{4}_[0-9]{2}_[0-9]{2})[.]jsonl[.]gz$', 1),
+            REGEXP_EXTRACT(
+                source_file,
+                '([0-9]{4}_[0-9]{2}_[0-9]{2})[.]jsonl[.]gz$',
+                1
+            ),
             '%Y_%m_%d'
         ) DESC NULLS LAST,
         source_file DESC

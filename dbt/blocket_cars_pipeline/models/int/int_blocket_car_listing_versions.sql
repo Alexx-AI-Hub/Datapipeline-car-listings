@@ -79,15 +79,34 @@ SELECT -- noqa: ST06
     -- New! valid_price
     COALESCE(s.price > 0, FALSE) AS valid_price,
 
+    -- Valid price change for analysis
+    COALESCE(
+        s.price > 0 AND previous_price > 0
+        AND ABS(price_change_pct) <= 50,
+        FALSE
+    ) AS valid_price_change,
+
     -- New! car_age
     CASE -- Calculate car age. Invalid years is set to NULL.
         WHEN
             s.model_year >= 1886
-            AND s.model_year <= YEAR(s.uploaded_at) + 1 -- Allow next years model age.
+            AND s.model_year <= YEAR(s.uploaded_at) + 1 --Allow nxt years model.
             THEN CAST(
                 GREATEST(YEAR(s.uploaded_at) - s.model_year, 0)
                 AS INTEGER
             )
-    END AS car_age
+    END AS car_age,
+
+    -- New! batch_date
+    CAST(
+        TRY_STRPTIME(
+            REGEXP_EXTRACT(
+                s.source_file,
+                '([0-9]{4}_[0-9]{2}_[0-9]{2})[.]jsonl[.]gz$',
+                1
+            ),
+            '%Y_%m_%d'
+        ) AS DATE
+    ) AS batch_date
 
 FROM {{ ref('stg_blocket_car_listings') }} AS s

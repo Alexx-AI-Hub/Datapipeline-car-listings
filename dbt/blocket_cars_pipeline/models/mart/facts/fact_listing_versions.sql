@@ -1,6 +1,6 @@
 {{ config(materialized='table', schema='mart') }}
 
--- Grain: one observed listing version per (listing_id, uploaded_at, source_file).
+-- Grain: 1 observed listing version per (listing_id, uploaded_at, source_file).
 -- Prices describe ads, not completed sales; do not sum across versions.
 SELECT -- noqa: ST06
     ROW_NUMBER() OVER (
@@ -37,7 +37,8 @@ SELECT -- noqa: ST06
     i.warranty_duration,
     i.driving_range,
     i.volume,
-    i.source_file
+    i.source_file,
+    i.valid_price_change
 FROM {{ ref('int_blocket_car_listing_geography') }} AS i
 LEFT JOIN {{ ref('dim_car') }} AS c
     ON
@@ -49,6 +50,7 @@ LEFT JOIN {{ ref('dim_car') }} AS c
         AND i.transmission IS NOT DISTINCT FROM c.transmission
         AND i.fuel_type IS NOT DISTINCT FROM c.fuel_type
         AND i.registration_class_name IS NOT DISTINCT FROM c.registration_class_name
+
 LEFT JOIN {{ ref('dim_seller') }} AS se
     ON
         i.org_id IS NOT DISTINCT FROM se.org_id
@@ -56,9 +58,11 @@ LEFT JOIN {{ ref('dim_seller') }} AS se
         AND i.seller_type IS NOT DISTINCT FROM se.seller_type
         AND i.dealer_group_id IS NOT DISTINCT FROM se.dealer_group_id
         AND i.association_memberships IS NOT DISTINCT FROM se.association_memberships
+
 LEFT JOIN {{ ref('dim_location') }} AS l
     ON
         i.region IS NOT DISTINCT FROM l.region
         AND i.location IS NOT DISTINCT FROM l.location
+
 LEFT JOIN {{ ref('dim_date') }} AS d
     ON CAST(i.uploaded_at AS DATE) = d.calendar_date

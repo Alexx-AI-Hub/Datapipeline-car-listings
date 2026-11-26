@@ -46,7 +46,9 @@ WITH listing_versions AS (
         i.price_change,
         i.price_change_pct,
         i.valid_price,
-        i.car_age
+        i.car_age,
+        i.batch_date,
+        i.valid_price_change
     FROM {{ ref('int_blocket_car_listing_versions') }} AS i
 ),
 
